@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import '@mdi/font/css/materialdesignicons.css'
 
 const router = createRouter({
   history: createWebHistory(),

@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="pa-0">
     <v-row no-gutters>
-      <!-- Sidebar moderno -->
+     
       <v-col cols="12" md="3">
         <v-navigation-drawer permanent class="elevation-2">
           <v-card flat class="pa-4 bg-gradient-primary">
@@ -16,7 +16,7 @@
           
           <v-divider class="my-3" />
           
-          <!-- Navegacion -->
+      
           <v-list nav dense>
             <v-list-item
               prepend-icon="mdi-account-group"
@@ -34,7 +34,7 @@
           
           <v-divider class="my-3" />
           
-          <!-- Acciones -->
+         
           <div class="pa-3">
             <div class="text-subtitle-2 mb-3 font-weight-bold">Acciones Rápidas</div>
             

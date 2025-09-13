@@ -48,16 +48,16 @@ class UsuarioController extends Controller
             ], 400);
         }
 
-
         $validated['password'] = Hash::make($validated['password']);
-
         $usuario = Usuario::create($validated);
+
         if (!$usuario) {
             return response()->json([
                 'message' => 'Error al crear el usuario',
                 'status' => false
             ], 500);
         }
+
         return response()->json([
             'message' => 'Usuario creado correctamente',
             'status' => true
@@ -69,7 +69,8 @@ class UsuarioController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $usuario = Usuario::findOrFail($id);
+        return response()->json($usuario);
     }
 
     /**
@@ -122,12 +123,27 @@ class UsuarioController extends Controller
         ], 200);
     }
 
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
+        $usuario = Usuario::findOrFail($id);
+
+        // evitar que un admin se elimine a si mismo
+        $currentUser = auth()->user();
+        if ($currentUser && $currentUser->id == $usuario->id) {
+            return response()->json([
+                'message' => 'No puedes eliminar tu propia cuenta.',
+                'status' => false
+            ], 422);
+        }
+
+        $usuario->delete();
+
+        return response()->json([
+            'message' => 'Usuario eliminado correctamente',
+            'status' => true
+        ], 200);
     }
 }

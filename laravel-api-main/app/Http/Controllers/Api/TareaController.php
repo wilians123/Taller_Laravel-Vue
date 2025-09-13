@@ -38,7 +38,7 @@ class TareaController extends Controller
 
         $tarea = Tarea::create($validated);
 
-        // Cargar la relación para devolver la respuesta completa
+
         $tarea->load('usuario:id,nombre,email');
 
         return response()->json([
@@ -48,7 +48,7 @@ class TareaController extends Controller
     }
 
     /**
-     * Mostrar tarea específica
+     * Mostrar tarea especifica
      */
     public function show(string $id)
     {
