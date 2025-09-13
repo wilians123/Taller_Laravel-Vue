@@ -25,19 +25,19 @@ class Usuario extends Authenticatable
         'password',
     ];
 
-    // IMPORTANTE: Configurar casting para password
+    // Configurar casting para password
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed', // Esto es importante para Laravel 10+
+        'password' => 'hashed',
     ];
 
-    // Especificar el campo de email para autenticación
+    // Especificar el campo de email para autenticacion
     public function getAuthIdentifierName()
     {
         return 'email';
     }
 
-    // Especificar el campo de password para autenticación
+    // Especificar el campo de password para autenticacion
     public function getAuthPassword()
     {
         return $this->password;

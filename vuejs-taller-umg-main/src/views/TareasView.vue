@@ -5,14 +5,13 @@
       <v-col cols="12" md="3">
         <v-card class="pa-4">
           <div class="text-subtitle-1 mb-2">Acciones</div>
-          
           <v-btn
             block color="primary" class="mb-3"
             @click="showCreateDialog = true"
+            v-if="isCurrentUserAdmin"
           >
             Agregar Tarea
           </v-btn>
-          
           <v-btn
             block color="success" variant="tonal" class="mb-3"
             @click="downloadReport"
@@ -20,7 +19,6 @@
           >
             Descargar Reporte
           </v-btn>
-          
           <v-text-field
             v-model="search"
             label="Buscar tareas"
@@ -29,24 +27,20 @@
             clearable
             class="mb-4"
           />
-          
           <v-btn block color="error" variant="tonal" @click="logout">
             Cerrar sesión
           </v-btn>
-          
           <v-divider class="my-4" />
-          
           <div class="text-caption">
             Sesión: <strong>{{ user?.nombre }}</strong> ({{ user?.rol }})
           </div>
         </v-card>
       </v-col>
-      
+
       <!-- Contenido principal -->
       <v-col cols="12" md="9">
         <v-card class="pa-4">
           <div class="text-h6 mb-4">Gestión de Tareas</div>
-          
           <v-data-table
             :items="filteredTareas"
             :headers="headers"
@@ -61,7 +55,7 @@
                 {{ formatEstado(item.estado) }}
               </v-chip>
             </template>
-            
+
             <template #item.prioridad="{ item }">
               <v-chip
                 :color="getPrioridadColor(item.prioridad)"
@@ -70,34 +64,38 @@
                 {{ formatPrioridad(item.prioridad) }}
               </v-chip>
             </template>
-            
+
             <template #item.fecha_vencimiento="{ item }">
               <span :class="{ 'text-red': isVencida(item.fecha_vencimiento) }">
                 {{ formatDate(item.fecha_vencimiento) }}
               </span>
             </template>
-            
+
             <template #item.usuario="{ item }">
               {{ item.usuario?.nombre || 'Sin asignar' }}
             </template>
-            
+
             <template #item.actions="{ item }">
-              <v-btn
-                icon="mdi-pencil"
-                size="small"
-                color="primary"
-                variant="text"
-                @click="editTarea(item)"
-              />
-              <v-btn
-                icon="mdi-delete"
-                size="small"
-                color="error"
-                variant="text"
-                @click="deleteTarea(item)"
-              />
+              <div class="d-flex gap-1" v-if="isCurrentUserAdmin">
+                <v-btn
+                  icon="mdi-pencil"
+                  size="small"
+                  color="primary"
+                  variant="tonal"
+                  @click="editTarea(item)"
+                  :title="'Editar tarea: ' + item.titulo"
+                />
+                <v-btn
+                  icon="mdi-delete"
+                  size="small"
+                  color="error"
+                  variant="tonal"
+                  @click="deleteTarea(item)"
+                  :title="'Eliminar tarea: ' + item.titulo"
+                />
+              </div>
             </template>
-            
+
             <template #no-data>
               <div class="pa-6 text-center">No hay tareas para mostrar.</div>
             </template>
@@ -105,14 +103,13 @@
         </v-card>
       </v-col>
     </v-row>
-    
+
     <!-- Dialog para crear/editar tarea -->
     <v-dialog v-model="showCreateDialog" max-width="600px">
       <v-card>
         <v-card-title>
           {{ editingTarea ? 'Editar Tarea' : 'Nueva Tarea' }}
         </v-card-title>
-        
         <v-card-text>
           <v-form v-model="formValid" @submit.prevent="saveTarea">
             <v-text-field
@@ -121,14 +118,12 @@
               :rules="[rules.required]"
               density="comfortable"
             />
-            
             <v-textarea
               v-model="tareaForm.descripcion"
               label="Descripción"
               rows="3"
               density="comfortable"
             />
-            
             <v-select
               v-model="tareaForm.estado"
               label="Estado"
@@ -136,7 +131,6 @@
               :rules="[rules.required]"
               density="comfortable"
             />
-            
             <v-select
               v-model="tareaForm.prioridad"
               label="Prioridad"
@@ -144,7 +138,6 @@
               :rules="[rules.required]"
               density="comfortable"
             />
-            
             <v-text-field
               v-model="tareaForm.fecha_vencimiento"
               label="Fecha de Vencimiento"
@@ -152,7 +145,6 @@
               :rules="[rules.required]"
               density="comfortable"
             />
-            
             <v-select
               v-model="tareaForm.usuario_id"
               label="Asignar a Usuario"
@@ -164,14 +156,13 @@
             />
           </v-form>
         </v-card-text>
-        
         <v-card-actions>
           <v-spacer />
           <v-btn color="grey" variant="text" @click="closeDialog">
             Cancelar
           </v-btn>
-          <v-btn 
-            color="primary" 
+          <v-btn
+            color="primary"
             :loading="saving"
             @click="saveTarea"
             :disabled="!formValid"
@@ -181,17 +172,21 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    
+
     <!-- Dialog de confirmación para eliminar -->
     <v-dialog v-model="showDeleteDialog" max-width="400px">
       <v-card>
-        <v-card-title>Confirmar Eliminación</v-card-title>
+        <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
         <v-card-text>
           ¿Estás seguro de que deseas eliminar la tarea "{{ tareaToDelete?.titulo }}"?
+          <br><br>
+          <v-alert type="warning" variant="tonal" density="compact">
+            Esta acción no se puede deshacer.
+          </v-alert>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="grey" variant="text" @click="showDeleteDialog = false">
+          <v-btn color="grey" variant="text" @click="showDeleteDialog = false" :disabled="deleting">
             Cancelar
           </v-btn>
           <v-btn color="error" @click="confirmDelete" :loading="deleting">
@@ -200,6 +195,25 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Snackbar para mostrar mensajes -->
+    <v-snackbar
+      v-model="showSnackbar"
+      :color="snackbarColor"
+      timeout="3000"
+      location="top"
+    >
+      {{ snackbarMessage }}
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="showSnackbar = false"
+        >
+          Cerrar
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -232,10 +246,14 @@ const showDeleteDialog = ref(false)
 const formValid = ref(false)
 const editingTarea = ref(false)
 const currentEditingId = ref<number | null>(null)
-
 const tareas = ref<Tarea[]>([])
 const usuarios = ref<Usuario[]>([])
 const tareaToDelete = ref<Tarea | null>(null)
+
+// Snackbar
+const showSnackbar = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref('success')
 
 const tareaForm = ref({
   titulo: '',
@@ -246,14 +264,28 @@ const tareaForm = ref({
   usuario_id: null as number | null
 })
 
-const headers = [
-  { title: 'Título', value: 'titulo' },
-  { title: 'Estado', value: 'estado' },
-  { title: 'Prioridad', value: 'prioridad' },
-  { title: 'Asignado a', value: 'usuario' },
-  { title: 'Vencimiento', value: 'fecha_vencimiento' },
-  { title: 'Acciones', value: 'actions', sortable: false }
-]
+const isCurrentUserAdmin = computed(() => user.value?.rol === 'admin')
+
+const headers = computed(() => {
+  if (isCurrentUserAdmin.value) {
+    return [
+      { title: 'Título', value: 'titulo' },
+      { title: 'Estado', value: 'estado' },
+      { title: 'Prioridad', value: 'prioridad' },
+      { title: 'Asignado a', value: 'usuario' },
+      { title: 'Vencimiento', value: 'fecha_vencimiento' },
+      { title: 'Acciones', value: 'actions', sortable: false }
+    ]
+  } else {
+    return [
+      { title: 'Título', value: 'titulo' },
+      { title: 'Estado', value: 'estado' },
+      { title: 'Prioridad', value: 'prioridad' },
+      { title: 'Asignado a', value: 'usuario' },
+      { title: 'Vencimiento', value: 'fecha_vencimiento' }
+    ]
+  }
+})
 
 const estadoOptions = [
   { title: 'Pendiente', value: 'pendiente' },
@@ -274,7 +306,6 @@ const rules = {
 onMounted(() => {
   const raw = localStorage.getItem('user')
   user.value = raw ? JSON.parse(raw) : null
-  
   fetchTareas()
   fetchUsuarios()
 })
@@ -286,6 +317,7 @@ const fetchTareas = async () => {
     tareas.value = data
   } catch (error) {
     console.error('Error al cargar tareas:', error)
+    showMessage('Error al cargar tareas', 'error')
   } finally {
     loading.value = false
   }
@@ -297,6 +329,7 @@ const fetchUsuarios = async () => {
     usuarios.value = data
   } catch (error) {
     console.error('Error al cargar usuarios:', error)
+    showMessage('Error al cargar usuarios', 'error')
   }
 }
 
@@ -379,15 +412,17 @@ const deleteTarea = (tarea: Tarea) => {
 
 const confirmDelete = async () => {
   if (!tareaToDelete.value) return
-  
   deleting.value = true
   try {
     await api.delete(`/tareas/delete/${tareaToDelete.value.id}`)
     await fetchTareas()
     showDeleteDialog.value = false
     tareaToDelete.value = null
-  } catch (error) {
+    showMessage('Tarea eliminada correctamente', 'success')
+  } catch (error: any) {
     console.error('Error al eliminar tarea:', error)
+    const message = error?.response?.data?.message || 'Error al eliminar tarea'
+    showMessage(message, 'error')
   } finally {
     deleting.value = false
   }
@@ -395,19 +430,21 @@ const confirmDelete = async () => {
 
 const saveTarea = async () => {
   if (!formValid.value) return
-  
   saving.value = true
   try {
     if (editingTarea.value) {
       await api.put(`/tareas/update/${currentEditingId.value}`, tareaForm.value)
+      showMessage('Tarea actualizada correctamente', 'success')
     } else {
       await api.post('/tareas/create', tareaForm.value)
+      showMessage('Tarea creada correctamente', 'success')
     }
-    
     await fetchTareas()
     closeDialog()
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error al guardar tarea:', error)
+    const message = error?.response?.data?.message || 'Error al guardar tarea'
+    showMessage(message, 'error')
   } finally {
     saving.value = false
   }
@@ -431,7 +468,6 @@ const downloadReport = async () => {
   downloadingReport.value = true
   try {
     const { data } = await api.get('/tareas/pendientes')
-    
     // Crear contenido CSV simple
     const csvContent = [
       ['ID', 'Título', 'Descripción', 'Prioridad', 'Usuario Asignado', 'Fecha Vencimiento'],
@@ -444,7 +480,7 @@ const downloadReport = async () => {
         tarea.fecha_vencimiento
       ])
     ].map(row => row.join(',')).join('\n')
-    
+
     // Descargar archivo
     const blob = new Blob([csvContent], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
@@ -453,9 +489,10 @@ const downloadReport = async () => {
     link.download = `tareas_pendientes_${new Date().toISOString().split('T')[0]}.csv`
     link.click()
     window.URL.revokeObjectURL(url)
-    
+    showMessage('Reporte descargado correctamente', 'success')
   } catch (error) {
     console.error('Error al descargar reporte:', error)
+    showMessage('Error al descargar reporte', 'error')
   } finally {
     downloadingReport.value = false
   }
@@ -466,11 +503,29 @@ const logout = () => {
   localStorage.removeItem('user')
   router.push('/login')
 }
+
+const showMessage = (message: string, color: string = 'success') => {
+  snackbarMessage.value = message
+  snackbarColor.value = color
+  showSnackbar.value = true
+}
 </script>
 
 <style scoped>
 .text-red {
   color: #f44336;
   font-weight: bold;
+}
+
+.gap-1 {
+  gap: 4px;
+}
+
+:deep(.v-data-table-header) {
+  background-color: #f5f5f5;
+}
+
+:deep(.v-data-table__tr:hover) {
+  background-color: #f9f9f9;
 }
 </style>
