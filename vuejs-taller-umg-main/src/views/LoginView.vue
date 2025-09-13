@@ -1,13 +1,13 @@
 <template>
   <div class="login-container">
-    <!-- Fondo con patrón -->
+    
     <div class="background-pattern"></div>
     
-    <!-- Contenido principal -->
+    
     <v-container class="d-flex align-center justify-center fill-height">
       <v-row justify="center" no-gutters>
         <v-col cols="12" sm="8" md="6" lg="4">
-          <!-- Logo/Header -->
+        
           <div class="text-center mb-8">
             <v-avatar size="80" class="mb-4 elevation-8" color="primary">
               <v-icon size="40" color="white">mdi-shield-account</v-icon>
@@ -16,7 +16,7 @@
             <p class="text-h6 text-medium-emphasis">Sistema de Gestión de Usuarios</p>
           </div>
           
-          <!-- Card de login -->
+         
           <v-card 
             class="login-card elevation-12 rounded-xl pa-8"
             :class="{ 'shake': errorMsg }"
@@ -80,7 +80,7 @@
                 Iniciar Sesión
               </v-btn>
               
-              <!-- Info de demo -->
+            
               <v-card 
                 variant="tonal" 
                 color="info" 
@@ -95,7 +95,7 @@
             </v-form>
           </v-card>
           
-          <!-- Footer -->
+          
           <div class="text-center mt-8">
             <p class="text-caption text-medium-emphasis">
               © 2025 UMG - Sistema de Gestión Laravel + Vue.js
@@ -244,7 +244,7 @@ const onSubmit = async () => {
   }
 }
 
-/* Efectos en los campos de entrada */
+
 .v-text-field :deep(.v-field) {
   transition: all 0.3s ease;
 }
@@ -257,7 +257,7 @@ const onSubmit = async () => {
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
 }
 
-/* Responsive */
+/*Responsive */
 @media (max-width: 600px) {
   .login-card {
     margin: 16px;

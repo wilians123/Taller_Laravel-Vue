@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar title="Taller Laravel + Vue" />
+    <v-app-bar title="Taller Laravel + Vue Willians" />
     <v-main>
       <router-view />
     </v-main>

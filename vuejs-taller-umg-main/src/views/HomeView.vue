@@ -16,7 +16,7 @@
           
           <v-divider class="my-3" />
           
-          <!-- Navegación -->
+          <!-- Navegacion -->
           <v-list nav dense>
             <v-list-item
               prepend-icon="mdi-account-group"
@@ -50,7 +50,7 @@
               Nuevo Usuario
             </v-btn>
             
-            <!-- Búsqueda -->
+            <!-- Busqueda -->
             <v-text-field
               v-model="search"
               label="Buscar usuarios"
@@ -78,7 +78,7 @@
       <!-- Contenido principal -->
       <v-col cols="12" md="9">
         <div class="pa-6">
-          <!-- Header -->
+       
           <div class="d-flex align-center justify-space-between mb-6">
             <div>
               <h1 class="text-h4 font-weight-bold mb-2">Gestión de Usuarios</h1>
@@ -95,7 +95,7 @@
             </v-chip>
           </div>
           
-          <!-- Estadísticas rápidas -->
+       
           <v-row class="mb-6">
             <v-col cols="12" sm="4">
               <v-card class="pa-4 text-center" elevation="2">
@@ -157,7 +157,7 @@ onMounted(() => {
 const currentRoute = computed(() => route.name)
 const isAdmin = computed(() => user.value?.rol === 'admin')
 
-// Estadísticas
+// Estadisticas
 const totalUsers = computed(() => users.value.length)
 const adminUsers = computed(() => users.value.filter(u => u.rol === 'admin').length)
 const regularUsers = computed(() => users.value.filter(u => u.rol === 'usuario').length)

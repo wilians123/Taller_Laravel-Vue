@@ -5,12 +5,10 @@ const router = createRouter({
   routes: [
     { path: '/', redirect: '/usuarios' },
     { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue') },
-
     { path: '/usuarios', name: 'usuarios', component: () => import('@/views/HomeView.vue'), meta: { requiresAuth: true } },
-
     { path: '/usuarios/nuevo', name: 'usuarios-nuevo', component: () => import('@/views/UserForm.vue'), meta: { requiresAuth: true } },
     { path: '/usuarios/:id/editar', name: 'usuarios-editar', component: () => import('@/views/UserForm.vue'), props: true, meta: { requiresAuth: true } },
-
+    { path: '/tareas', name: 'tareas', component: () => import('@/views/TareasView.vue'), meta: { requiresAuth: true } },
     { path: '/:pathMatch(.*)*', redirect: '/usuarios' },
   ],
 })

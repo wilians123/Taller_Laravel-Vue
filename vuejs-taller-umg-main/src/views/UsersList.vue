@@ -49,6 +49,9 @@ type Usuario = {
 }
 
 const props = defineProps<{ searchTerm?: string }>()
+const emit = defineEmits<{
+  usersLoaded: [users: Usuario[]]
+}>()
 const router = useRouter()
 
 const items = ref<Usuario[]>([])
@@ -68,6 +71,7 @@ const fetchUsers = async () => {
   try {
     const { data } = await api.get<Usuario[]>('/usuarios/listUsers')
     items.value = data
+    emit('usersLoaded', data) // Emitir evento con los usuarios cargados
   } catch (error) {
     console.error('Error al cargar usuarios:', error)
   } finally {
