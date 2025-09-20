@@ -11,16 +11,22 @@ use App\Http\Controllers\Api\AuthController;
 |--------------------------------------------------------------------------
 */
 
-// Ruta para obtener usuario autenticado
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Ruta de prueba para la deteccion del tenant
+Route::middleware('tenant')->get('/tenant-test', function (Request $request) {
+    $tenant = $request->attributes->get('tenant');
+    return response()->json([
+        'host' => $request->getHost(),
+        'tenant_detected' => $tenant,
+        'message' => $tenant ? "Tenant '{$tenant}' detectado correctamente" : 'No se detectó tenant',
+        'timestamp' => now()
+    ]);
 });
 
-// Rutas de autenticación (sin middleware)
+// Rutas de autenticacion SIN tenant middleware (por ahora)
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-// Rutas protegidas con auth:sanctum
+// Rutas protegidas SIN tenant middleware
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 

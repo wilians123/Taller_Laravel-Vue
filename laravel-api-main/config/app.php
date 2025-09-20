@@ -192,4 +192,11 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Base Domain for Multitenancy
+    |--------------------------------------------------------------------------
+    */
+    'base_domain' => env('APP_BASE_DOMAIN', 'localhost'),
 ];
