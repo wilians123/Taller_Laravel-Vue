@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\AuthController;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +23,39 @@ Route::middleware('tenant')->get('/tenant-test', function (Request $request) {
     ]);
 });
 
-// Rutas de autenticacion SIN tenant middleware (por ahora)
+
+
+// Ruta de prueba para verificar conexión a BD del tenant
+Route::middleware('tenant')->get('/tenant-db-test', function (Request $request) {
+    $tenant = $request->attributes->get('tenant');
+
+    try {
+        // Probar conexión a la base de datos
+        $databaseName = DB::connection()->getDatabaseName();
+
+        // Contar usuarios en la BD actual
+        $userCount = DB::table('usuarios')->count();
+
+        return response()->json([
+            'host' => $request->getHost(),
+            'tenant_detected' => $tenant,
+            'database_name' => $databaseName,
+            'users_count' => $userCount,
+            'message' => $tenant ? "Conectado a BD del tenant '{$tenant}'" : 'Conectado a BD por defecto',
+            'timestamp' => now()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'host' => $request->getHost(),
+            'tenant_detected' => $tenant,
+            'error' => $e->getMessage(),
+            'message' => 'Error conectando a la base de datos',
+            'timestamp' => now()
+        ], 500);
+    }
+});
+
+// Rutas de autenticacion SIN tenant middleware
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
