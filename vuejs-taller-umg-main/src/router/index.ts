@@ -30,27 +30,6 @@ router.beforeEach(async (to) => {
       return { name: 'login', query: { redirect: to.fullPath } }
     }
     
-    // COMENTAR LA VERIFICACIÓN DEL TOKEN POR AHORA
-    // La verificación se hará en los componentes individuales
-    /*
-    try {
-      const response = await fetch(`${getApiUrl()}/user`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      })
-      
-      if (!response.ok) {
-        console.log('Token invalid, clearing and redirecting')
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        return { name: 'login', query: { redirect: to.fullPath } }
-      }
-    } catch (error) {
-      console.log('Error verifying token:', error)
-    }
-    */
   }
   
   if (to.name === 'login' && token && user) {
@@ -61,7 +40,7 @@ router.beforeEach(async (to) => {
   return true
 })
 
-// Función auxiliar para obtener la URL de API según el tenant
+// Funcion para obtener la URL del API segun el tenant
 function getApiUrl(): string {
   const hostname = window.location.hostname
   

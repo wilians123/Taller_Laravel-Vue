@@ -19,12 +19,11 @@ const getBaseURL = (): string => {
   const tenant = getTenantFromHostname()
   
   if (tenant) {
-    // Si hay tenant, usar el subdominio correspondiente en el backend
-    return `http://${tenant}.localhost:8000/api`
+    // Si hay tenant, usar las rutas con parámetro tenant
+    return 'http://127.0.0.1:8000/api/tenant/' + tenant
   }
-  
   // Sin tenant, usar la URL normal
-  return 'http://127.0.0.1:8000/api'
+  return 'http://127.0.0.1:8000/api'  // ← Esta es la URL correcta
 }
 
 const api = axios.create({
