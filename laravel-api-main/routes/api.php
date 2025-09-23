@@ -58,7 +58,7 @@ Route::middleware(['tenant', 'auth:sanctum'])->get('/user', function (Request $r
 Route::middleware('tenant')->post('/login', [AuthController::class, 'login']);
 Route::middleware('tenant')->post('/register', [AuthController::class, 'register']);
 
-// Rutas protegidas CON tenant + auth
+// Rutas protegidas - CAMBIAR ORDEN: tenant ANTES que auth:sanctum
 Route::middleware(['tenant', 'auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
