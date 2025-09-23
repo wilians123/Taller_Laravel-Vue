@@ -31,20 +31,35 @@ const api = axios.create({
   baseURL: getBaseURL(),
 })
 
+// Log para debug
+console.log('API configurado para:', {
+  hostname: window.location.hostname,
+  tenant: getTenantFromHostname(),
+  baseURL: getBaseURL()
+})
+
 api.interceptors.request.use((config) => {
   // rutas que no deben llevar token
   const noAuthEndpoints = ['/login', '/register']
   if (!noAuthEndpoints.includes(config.url || '')) {
     const token = localStorage.getItem('token')
-    if (token) config.headers.Authorization = `Bearer ${token}`
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+      console.log('Token agregado a request:', token.substring(0, 20) + '...')
+    }
   }
+  console.log('Request config:', config.url, config.method)
   return config
 })
 
 // Interceptor para manejar errores de conexión entre tenants
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('Response exitoso:', response.config.url)
+    return response
+  },
   (error) => {
+    console.log('Error en response:', error.response?.status, error.config?.url)
     if (error.response?.status === 401) {
       // Token inválido para este tenant, limpiar y redirigir al login
       localStorage.removeItem('token')
