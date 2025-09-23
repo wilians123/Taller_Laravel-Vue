@@ -1,10 +1,21 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Vue + TS</title>
+    <title>Principal</title>
+    <script>
+      // Cambiar título según el subdominio
+      const hostname = window.location.hostname;
+      if (hostname === "empresa1.localhost") {
+        document.title = "Empresa1";
+      } else if (hostname === "empresa2.localhost") {
+        document.title = "Empresa2";
+      } else {
+        document.title = "Principal";
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
