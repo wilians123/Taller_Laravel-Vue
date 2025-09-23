@@ -85,14 +85,14 @@
               <p class="text-subtitle-1 text-medium-emphasis">Administra los usuarios del sistema</p>
             </div>
             
-            <v-chip
-              color="success"
-              variant="elevated"
-              size="large"
-              prepend-icon="mdi-check-circle"
-            >
-              Sistema Activo
-            </v-chip>
+           <v-chip
+  :color="tenantInfo.color"
+  variant="elevated"
+  size="large"
+  prepend-icon="mdi-domain"
+>
+  {{ tenantInfo.name }}
+</v-chip>
           </div>
           
        
@@ -134,6 +134,8 @@
       </v-col>
     </v-row>
   </v-container>
+
+
 </template>
 
 <script setup lang="ts">
@@ -173,6 +175,28 @@ const logout = () => {
 const onUsersLoaded = (loadedUsers: User[]) => {
   users.value = loadedUsers
 }
+
+// Detectar tenant actual
+const getTenantInfo = () => {
+  const hostname = window.location.hostname
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return { name: 'Principal', color: 'primary' }
+  }
+  
+  const match = hostname.match(/^([^.]+)\.localhost$/)
+  if (match) {
+    const tenant = match[1]
+    return {
+      name: tenant.charAt(0).toUpperCase() + tenant.slice(1),
+      color: tenant === 'empresa1' ? 'success' : 'warning'
+    }
+  }
+  
+  return { name: 'Principal', color: 'primary' }
+}
+
+const tenantInfo = ref(getTenantInfo())
+
 </script>
 
 <style scoped>
