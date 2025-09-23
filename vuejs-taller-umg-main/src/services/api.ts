@@ -9,7 +9,7 @@ const getTenantFromHostname = (): string | null => {
     return null
   }
   
-  // Extraer subdominio (empresa1.localhost -> empresa1)
+  // Extraer subdominio 
   const match = hostname.match(/^([^.]+)\.localhost$/)
   return match ? match[1] : null
 }
@@ -23,7 +23,7 @@ const getBaseURL = (): string => {
     return 'http://127.0.0.1:8000/api/tenant/' + tenant
   }
   // Sin tenant, usar la URL normal
-  return 'http://127.0.0.1:8000/api'  // ← Esta es la URL correcta
+  return 'http://127.0.0.1:8000/api' 
 }
 
 const api = axios.create({

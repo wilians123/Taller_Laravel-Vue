@@ -26,7 +26,7 @@ class SanctumTenantMiddleware
             return response()->json(['message' => 'Tenant not found'], 404);
         }
 
-        // Ahora verificar el token en la base de datos correcta
+        //verificar el token en la base de datos correcta
         $token = $this->authenticateWithTenant($request);
 
         if (!$token) {
@@ -102,13 +102,11 @@ class SanctumTenantMiddleware
         Log::info("Base de datos configurada para auth: {$databaseName}");
     }
 
-    /**
-     * Crear la base de datos del tenant si no existe
-     */
+
     private function ensureTenantDatabaseExists(string $databaseName): void
     {
         try {
-            // Conectar sin especificar base de datos
+            // Conectar sin especificar esquema base de datos
             $defaultConnection = config('database.connections.mysql');
             $pdo = new \PDO(
                 "mysql:host={$defaultConnection['host']};port={$defaultConnection['port']}",
@@ -117,7 +115,7 @@ class SanctumTenantMiddleware
                 [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
             );
 
-            // Crear base de datos
+            // Crear esquema base de datos
             $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$databaseName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
             Log::info("Base de datos {$databaseName} verificada/creada para auth");
 
@@ -185,7 +183,7 @@ class SanctumTenantMiddleware
                 return null;
             }
 
-            // Actualizar last_used_at
+            // Actualizar
             $accessToken->forceFill(['last_used_at' => now()])->save();
 
             // Establecer el usuario autenticado

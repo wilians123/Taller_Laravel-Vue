@@ -51,11 +51,11 @@ Route::middleware('tenant')->get('/tenant-db-test', function (Request $request) 
 
 // RUTAS PRINCIPALES CON TENANT POR PARÁMETRO
 Route::prefix('tenant/{tenant}')->group(function () {
-    // Autenticación por tenant (NO requieren autenticación)
+    // Autenticación por tenant
     Route::post('/login', [AuthController::class, 'login'])->middleware('tenant_param');
     Route::post('/register', [AuthController::class, 'register'])->middleware('tenant_param');
 
-    // Rutas protegidas - usar el nuevo middleware
+    // Rutas protegidas
     Route::middleware('sanctum_tenant')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -85,8 +85,7 @@ Route::prefix('tenant/{tenant}')->group(function () {
     });
 });
 
-// RUTAS PARA DOMINIO PRINCIPAL (localhost sin subdominio)
-// Estas usan la base de datos principal 'laravel_taller'
+// RUTAS PARA DOMINIO PRINCIPAL
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
@@ -95,7 +94,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Rutas protegidas para dominio principal - usando auth:sanctum normal
+// Rutas protegidas para dominio principal
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
