@@ -5,14 +5,15 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\TareaController;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes - Multitenancy por parámetro
+| API Routes
 |--------------------------------------------------------------------------
 */
 
-// Rutas de prueba de tenant (mantener)
+// Rutas de prueba para el tenant
 Route::middleware('tenant')->get('/tenant-test', function (Request $request) {
     $tenant = $request->attributes->get('tenant');
     return response()->json([
@@ -25,7 +26,6 @@ Route::middleware('tenant')->get('/tenant-test', function (Request $request) {
 
 Route::middleware('tenant')->get('/tenant-db-test', function (Request $request) {
     $tenant = $request->attributes->get('tenant');
-
     try {
         $databaseName = DB::connection()->getDatabaseName();
         $userCount = DB::table('usuarios')->count();
@@ -49,17 +49,54 @@ Route::middleware('tenant')->get('/tenant-db-test', function (Request $request) 
     }
 });
 
-// Ruta para obtener usuario autenticado CON tenant
-Route::middleware(['tenant', 'auth:sanctum'])->get('/user', function (Request $request) {
+// RUTAS PRINCIPALES CON TENANT POR PARÁMETRO
+Route::prefix('tenant/{tenant}')->group(function () {
+    // Autenticación por tenant (NO requieren autenticación)
+    Route::post('/login', [AuthController::class, 'login'])->middleware('tenant_param');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('tenant_param');
+
+    // Rutas protegidas - usar el nuevo middleware
+    Route::middleware('sanctum_tenant')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+
+        // Ruta para obtener usuario autenticado
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        });
+
+        // Usuarios por tenant
+        Route::prefix('usuarios')->group(function () {
+            Route::get('/listUsers', [UsuarioController::class, 'index']);
+            Route::post('/addUser', [UsuarioController::class, 'store']);
+            Route::get('/getUser/{id}', [UsuarioController::class, 'show']);
+            Route::put('/updateUser/{id}', [UsuarioController::class, 'update']);
+            Route::delete('/deleteUser/{id}', [UsuarioController::class, 'destroy']);
+        });
+
+        // Tareas por tenant
+        Route::prefix('tareas')->group(function () {
+            Route::get('/list', [TareaController::class, 'index']);
+            Route::post('/create', [TareaController::class, 'store']);
+            Route::get('/show/{id}', [TareaController::class, 'show']);
+            Route::put('/update/{id}', [TareaController::class, 'update']);
+            Route::delete('/delete/{id}', [TareaController::class, 'destroy']);
+            Route::get('/pendientes', [TareaController::class, 'tareasPendientes']);
+        });
+    });
+});
+
+// RUTAS PARA DOMINIO PRINCIPAL (localhost sin subdominio)
+// Estas usan la base de datos principal 'laravel_taller'
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
+// Ruta para obtener usuario autenticado SIN tenant (BD principal)
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Rutas de autenticación CON tenant (para subdominios)
-Route::middleware('tenant')->post('/login', [AuthController::class, 'login']);
-Route::middleware('tenant')->post('/register', [AuthController::class, 'register']);
-
-// Rutas protegidas - CAMBIAR ORDEN: tenant ANTES que auth:sanctum
-Route::middleware(['tenant', 'auth:sanctum'])->group(function () {
+// Rutas protegidas para dominio principal - usando auth:sanctum normal
+Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Rutas para usuarios
@@ -73,42 +110,11 @@ Route::middleware(['tenant', 'auth:sanctum'])->group(function () {
 
     // Rutas para tareas
     Route::prefix('tareas')->group(function () {
-        Route::get('/list', [App\Http\Controllers\Api\TareaController::class, 'index']);
-        Route::post('/create', [App\Http\Controllers\Api\TareaController::class, 'store']);
-        Route::get('/show/{id}', [App\Http\Controllers\Api\TareaController::class, 'show']);
-        Route::put('/update/{id}', [App\Http\Controllers\Api\TareaController::class, 'update']);
-        Route::delete('/delete/{id}', [App\Http\Controllers\Api\TareaController::class, 'destroy']);
-        Route::get('/pendientes', [App\Http\Controllers\Api\TareaController::class, 'tareasPendientes']);
-    });
-});
-
-// NUEVAS RUTAS CON TENANT POR PARÁMETRO
-Route::prefix('tenant/{tenant}')->middleware(['tenant_param'])->group(function () {
-
-    // Autenticación por tenant
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-
-        // Usuarios por tenant
-        Route::prefix('usuarios')->group(function () {
-            Route::get('/listUsers', [UsuarioController::class, 'index']);
-            Route::post('/addUser', [UsuarioController::class, 'store']);
-            Route::get('/getUser/{id}', [UsuarioController::class, 'show']);
-            Route::put('/updateUser/{id}', [UsuarioController::class, 'update']);
-            Route::delete('/deleteUser/{id}', [UsuarioController::class, 'destroy']);
-        });
-
-        // Tareas por tenant
-        Route::prefix('tareas')->group(function () {
-            Route::get('/list', [App\Http\Controllers\Api\TareaController::class, 'index']);
-            Route::post('/create', [App\Http\Controllers\Api\TareaController::class, 'store']);
-            Route::get('/show/{id}', [App\Http\Controllers\Api\TareaController::class, 'show']);
-            Route::put('/update/{id}', [App\Http\Controllers\Api\TareaController::class, 'update']);
-            Route::delete('/delete/{id}', [App\Http\Controllers\Api\TareaController::class, 'destroy']);
-            Route::get('/pendientes', [App\Http\Controllers\Api\TareaController::class, 'tareasPendientes']);
-        });
+        Route::get('/list', [TareaController::class, 'index']);
+        Route::post('/create', [TareaController::class, 'store']);
+        Route::get('/show/{id}', [TareaController::class, 'show']);
+        Route::put('/update/{id}', [TareaController::class, 'update']);
+        Route::delete('/delete/{id}', [TareaController::class, 'destroy']);
+        Route::get('/pendientes', [TareaController::class, 'tareasPendientes']);
     });
 });
