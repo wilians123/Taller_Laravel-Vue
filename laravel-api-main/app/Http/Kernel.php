@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'tenant' => \App\Http\Middleware\TenantMiddleware::class,
         'tenant_param' => \App\Http\Middleware\TenantParamMiddleware::class,
+        'sanctum_tenant' => \App\Http\Middleware\SanctumTenantMiddleware::class,
     ];
 }
